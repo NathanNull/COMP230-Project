@@ -2,11 +2,11 @@ import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
 import oracledb from "oracledb";
+oracledb.fetchAsString = [oracledb.CLOB];
 import cors from "cors";
 
 const app = express();
 app.use(cors());
-app.use(express.json()); // TODO: May take this out later if I don't need it, not too sure
 
 const dbConfig = {
     user: process.env.DB_USER,
@@ -14,31 +14,79 @@ const dbConfig = {
     connectString: process.env.DB_CONNECT_STRING,
 };
 
-app.get("/users", async (req, res) => {
-    //const cmd = "select * from all_tables";
-    const cmd = "select USER,SYS_CONTEXT ('USERENV', 'SESSION_USER') from dual";
+/**
+ * 
+ * @param {oracledb.Lob} clob 
+ * @return {string}
+ */
+async function CLOBToString(clob) {
+    return new Promise((resolve, reject) => {
+        let clobData = "";
+        clob.setEncoding("utf8")
+            .on("data", (chunk) => { clobData += chunk; })
+            .on("end", () => { resolve(clobData); })
+            .on("error", (err) => { console.log("Failed to parse clob"); reject(err); });
+    });
+}
+
+async function db_run(query) {
     let connection;
     try {
         connection = await oracledb.getConnection(dbConfig);
-        //const result = await connection.execute("select table_name from all_tables");
-        const result = await connection.execute(cmd);
-        const cols = result.metaData.map(v=>v.name);
-        console.log(cols);
-        res.json(result.rows.map(row=>{
-            let r = [];
-            for (let i = 0; i < cols.length; i++) {
-                r.push(`(${cols[i]}, ${row[i]})\t`);
-            }
-            return r;
-        }));
+        const result = await connection.execute(query, []);
+
+        // Map row arrays to objects w/ keys=column names
+        let res = result.rows.map(r => {
+            let obj = {};
+            r.forEach((val, i) => {
+                obj[result.metaData[i].name.toLowerCase()] = val;
+            });
+            return obj;
+        });
+        return res;
     } catch (err) {
-        console.log(cmd);
+        console.log(query);
         console.log(err.message);
-        res.status(500).send(err.message);
+        throw new Error(err.message);
     } finally {
         if (connection) await connection.close();
     }
-})
+}
+
+/**
+ * 
+ * @param {string} endpoint 
+ * @param {(args: {[key: string]: string})=>string} cmd 
+ * @param {(res: {[key: string]: any}[])=>any} parse 
+ */
+function query_endpoint(endpoint, cmd, parse = r => r) {
+    app.get(endpoint, async (req, res) => {
+        //const cmd = "select * from user_tables";
+        try {
+            let result = await db_run(cmd(req.params));
+            res.json(parse(result));
+        } catch (err) {
+            console.log(cmd);
+            console.log(err);
+            res.status(500).send(err);
+        }
+    });
+}
+
+query_endpoint("/auth/:email/:pw_hash", ({ email, pw_hash }) =>
+    `select e.* from edcuser e where e.email = '${email}' and e.password = '${pw_hash}'`,
+    (res) => {
+        if (res.length == 0) {
+            return { auth_ok: false };
+        } else {
+            return { auth_ok: true, ...res[0] }
+        }
+    });
+query_endpoint("/tutors", () => "select * from tutor t join edcuser u on t.tutorid=u.edcuserid");
+query_endpoint("/bookedsessions/:studentid", ({ studentid }) =>
+    `select ts.*, u.firstname, u.lastname
+    from tutoringsession ts join tutor t on t.tutorid=ts.tutorid join edcuser u on t.tutorid=u.edcuserid
+    where studentid='${studentid}'`);
 
 const port = 5000;
 app.listen(port, () => console.log(`Server running on port ${port}`));

@@ -1,0 +1,10 @@
+Website Intended Capabilities:
+
+Register user (student/tutor)?
+As a student:
+- View tutors + availability (will need a calendar)
+- Schedule session w/ tutor
+- View scheduled/past sessions, cancel if desired
+- Set up and make payments
+As a tutor:
+- idek lmao, maybe I just won't do this one
