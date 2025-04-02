@@ -1,7 +1,8 @@
-import logo from './logo.svg';
+import logo from '../logo.svg';
 import { useEffect } from 'react';
-import { useAuthContext } from './helpers/auth';
+import { useAuthContext } from '../helpers/auth';
 import { useNavigate } from 'react-router';
+import { gstyles } from "../helpers/globalStyles";
 
 export default function Home() {
   document.styleSheets[0].insertRule(`@keyframes spin {
@@ -18,17 +19,17 @@ export default function Home() {
 
   useEffect(() => {
     if (user != null) {
-      if (user.usertype = "Student") {
+      if (user.usertype === "Student") {
         navigate("/studenthome");
       } else {
-        console.log("Unhandled user type "+user.usertype);
+        console.log("Unhandled user type " + user.usertype);
       }
     }
-  }, [user])
+  }, [user, navigate])
 
   return (
     <div className="App">
-      <header style={styles.container}>
+      <header style={gstyles.container}>
         <img src={logo} style={styles.logo} alt="logo" />
         <span>Homepage (TODO: replace)</span>
       </header>
@@ -40,15 +41,6 @@ export default function Home() {
  * @type {{[key: string]: React.CSSProperties}}
  */
 const styles = {
-  container: {
-    position: '',
-    backgroundColor: '#eeeeee',
-    minHeight: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   logo: {
     height: '40vmin',
     pointerEvents: 'none',

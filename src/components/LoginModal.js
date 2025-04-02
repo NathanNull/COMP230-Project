@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { gstyles } from "../helpers/globalStyles";
 import { useAuthContext } from "../helpers/auth";
+import Modal from "../helpers/Modal";
 
 export default function LoginModal({ visible, setVisible }) {
     const { login, user } = useAuthContext();
@@ -45,21 +46,28 @@ export default function LoginModal({ visible, setVisible }) {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    return (<form onSubmit={submitLoginInfo} style={{ display: visible ? 'flex' : 'none', ...gstyles.modal }}>
-        <label>
-            Email: <input name="email" type="email" placeholder="Email" style={styles.input} value={formData.email} onChange={handleFormChange} />
-        </label>
-        <label>
-            Password: <input name="password" type="password" placeholder="Password" style={styles.input} value={formData.password} onChange={handleFormChange} />
-        </label>
-        <div style={{ display: 'flex', gap: 10 }}>
-            <button style={{ backgroundColor: '#33aa33', color: 'white', ...gstyles.button }} type="submit">Login</button>
-            <button style={{ backgroundColor: '#aa3333', color: 'white', ...gstyles.button }} onClick={close}>Cancel</button>
-        </div>
-        <div style={{ display: failReason === "" ? 'none' : 'flex', color: 'red' }}>{failReason}</div>
-    </form>)
+    return (<Modal visible={visible}>
+        <form onSubmit={submitLoginInfo} style={styles.form}>
+            <label>
+                Email: <input name="email" type="email" placeholder="Email" style={styles.input} value={formData.email} onChange={handleFormChange} />
+            </label>
+            <label>
+                Password: <input name="password" type="password" placeholder="Password" style={styles.input} value={formData.password} onChange={handleFormChange} />
+            </label>
+            <div style={{ display: 'flex', gap: 10 }}>
+                <button style={{ backgroundColor: '#33aa33', color: 'white', ...gstyles.button }} type="submit">Login</button>
+                <button style={{ backgroundColor: '#aa3333', color: 'white', ...gstyles.button }} onClick={close}>Cancel</button>
+            </div>
+            <div style={{ display: failReason === "" ? 'none' : 'flex', color: 'red' }}>{failReason}</div>
+        </form>
+    </Modal>)
 }
 
 const styles = {
-    input: { borderColor: 'lightgrey', borderRadius: 3 }
+    input: { borderColor: 'lightgrey', borderRadius: 3 },
+    form: {
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center',
+        gap: 10
+    }
 }

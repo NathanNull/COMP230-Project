@@ -3,6 +3,7 @@ dotenv.config();
 import express from "express";
 import oracledb from "oracledb";
 oracledb.fetchAsString = [oracledb.CLOB];
+oracledb.autoCommit = true;
 import cors from "cors";
 
 const app = express();
@@ -36,7 +37,7 @@ async function db_run(query) {
         const result = await connection.execute(query, []);
 
         // Map row arrays to objects w/ keys=column names
-        let res = result.rows.map(r => {
+        let res = result.rows === undefined ? result.rowsAffected : result.rows.map(r => {
             let obj = {};
             r.forEach((val, i) => {
                 obj[result.metaData[i].name.toLowerCase()] = val;
@@ -82,11 +83,14 @@ query_endpoint("/auth/:email/:pw_hash", ({ email, pw_hash }) =>
             return { auth_ok: true, ...res[0] }
         }
     });
-query_endpoint("/tutors", () => "select * from tutor t join edcuser u on t.tutorid=u.edcuserid");
+query_endpoint("/tutors", () => "select * from tutor t join edcuser u on t.tutorid=u.edcuserid order by t.subjecttaught, t.languagespoken");
 query_endpoint("/bookedsessions/:studentid", ({ studentid }) =>
     `select ts.*, u.firstname, u.lastname
     from tutoringsession ts join tutor t on t.tutorid=ts.tutorid join edcuser u on t.tutorid=u.edcuserid
-    where studentid='${studentid}'`);
+    where studentid='${studentid}' order by ts.sessionstatus desc, ts.sessiondate asc, ts.starttime asc`);
+query_endpoint("/cancelsession/:studentid/:sessionid", ({studentid, sessionid}) => 
+    `update tutoringsession set sessionstatus='Cancelled' where sessionid='${sessionid}' and studentid='${studentid}'`);
+query_endpoint("/studentinfo/:studentid", ({studentid}) => `select * from student where studentid='${studentid}'`);
 
 const port = 5000;
 app.listen(port, () => console.log(`Server running on port ${port}`));

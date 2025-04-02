@@ -2,20 +2,6 @@
  * @type {{[key: string]: React.CSSProperties}}
  */
 export const gstyles = {
-    modal: {
-        position: 'fixed',
-        zIndex: 20,
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        background: 'white',
-        color: 'black',
-        padding: 10,
-        borderRadius: 10,
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 10
-    },
     button: {
         fontSize: 20,
         borderWidth: 1,
@@ -23,5 +9,14 @@ export const gstyles = {
         borderStyle: 'solid',
         borderRadius: 5,
         padding: 5,
+    },
+    container: {
+        backgroundColor: '#eeeeee',
+        minHeight: '90vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'start',
+        padding: "5vw",
     },
 };

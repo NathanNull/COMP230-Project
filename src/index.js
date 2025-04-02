@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import Home from './Home';
+import Home from './components/Home';
 import { AuthContextProvider } from './helpers/auth';
 import { BrowserRouter, Route, Routes } from 'react-router';
 import Navbar from './components/Navbar';
-import StudentHome from './StudentHome';
+import StudentHome from './components/StudentHome';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
