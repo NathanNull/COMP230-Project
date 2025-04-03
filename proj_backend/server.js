@@ -15,26 +15,20 @@ const dbConfig = {
     connectString: process.env.DB_CONNECT_STRING,
 };
 
-/**
- * 
- * @param {oracledb.Lob} clob 
- * @return {string}
- */
-async function CLOBToString(clob) {
-    return new Promise((resolve, reject) => {
-        let clobData = "";
-        clob.setEncoding("utf8")
-            .on("data", (chunk) => { clobData += chunk; })
-            .on("end", () => { resolve(clobData); })
-            .on("error", (err) => { console.log("Failed to parse clob"); reject(err); });
-    });
-}
-
 async function db_run(query) {
     let connection;
     try {
         connection = await oracledb.getConnection(dbConfig);
-        const result = await connection.execute(query, []);
+        let result;
+        if (typeof query === typeof []) {
+            await Promise.all(
+                query.map(
+                    async q => result = await connection.execute(q, [])
+                )
+            );
+        } else {
+            result = await connection.execute(query, []);
+        }
 
         // Map row arrays to objects w/ keys=column names
         let res = result.rows === undefined ? result.rowsAffected : result.rows.map(r => {
@@ -85,21 +79,28 @@ query_endpoint("/auth/:email/:pw_hash", ({ email, pw_hash }) =>
     });
 query_endpoint("/tutors", () => "select * from tutor t join edcuser u on t.tutorid=u.edcuserid order by t.subjecttaught, t.languagespoken");
 query_endpoint("/bookedsessions/:studentid", ({ studentid }) =>
-    `select ts.*, u.firstname, u.lastname
-    from tutoringsession ts join tutor t on t.tutorid=ts.tutorid join edcuser u on t.tutorid=u.edcuserid
-    where studentid='${studentid}' order by ts.sessionstatus desc, ts.sessiondate asc, ts.starttime asc`);
+    `select ts.*, u.firstname, u.lastname, p.*
+    from tutoringsession ts join tutor t on t.tutorid=ts.tutorid join edcuser u on t.tutorid=u.edcuserid join payment p on p.sessionid=ts.sessionid
+    where ts.studentid='${studentid}' order by ts.sessionstatus desc, ts.sessiondate asc, ts.starttime asc`);
 query_endpoint("/cancelsession/:studentid/:sessionid", ({ studentid, sessionid }) =>
-    `update tutoringsession set sessionstatus='Cancelled' where sessionid='${sessionid}' and studentid=${studentid}`, r=> {
-        console.log("Altered "+r+" rows");
+    `update tutoringsession set sessionstatus='Cancelled' where sessionid='${sessionid}' and studentid=${studentid}`, r => {
+        console.log("Altered " + r + " rows");
         return r;
     });
 query_endpoint("/studentinfo/:studentid", ({ studentid }) => `select * from student where studentid=${studentid}`);
 query_endpoint("/tutorsessions/:tutorid", ({ tutorid }) => `select * from tutoringsession where tutorid=${tutorid}`);
 query_endpoint("/taughtsubjects/:tutorid", ({ tutorid }) =>
     `select * from subject where exists(select * from tutor where tutorid=${tutorid} and subjecttaught=subjectname)`);
-query_endpoint("/schedulesession/:sessionid/:tutorid/:studentid/:subjectid/:mode/:date/:starttime/:endtime/:notes",
-    ({ sessionid, tutorid, studentid, subjectid, mode, date, starttime, endtime, notes }) =>
-        `insert into tutoringsession values ('${sessionid}', ${tutorid}, ${studentid}, '${subjectid}', '${mode}', TO_DATE('${date}', 'DD-MM-YYYY'), TO_DATE('${starttime}', 'HH24:MI:SS'), TO_DATE('${endtime}', 'HH24:MI:SS'), 'Scheduled', '${notes}')`)
+query_endpoint("/schedulesession/:sessionid/:tutorid/:studentid/:subjectid/:mode/:date/:starttime/:endtime/:notes/:paymentmethod/:amount",
+    ({ sessionid, tutorid, studentid, subjectid, mode, date, starttime, endtime, notes, paymentmethod, amount }) =>
+        [`insert into tutoringsession values
+    ('${sessionid}', ${tutorid}, ${studentid}, '${subjectid}', '${mode}',
+    TO_DATE('${date}', 'DD-MM-YYYY'), TO_DATE('${starttime}', 'HH24:MI:SS'),
+    TO_DATE('${endtime}', 'HH24:MI:SS'), 'Scheduled', '${notes}')`,
+        `insert into payment values (null, ${studentid}, ${tutorid}, '${sessionid}', ${amount}, '${paymentmethod}', 'Pending', SYSDATE)`
+        ]);
+query_endpoint("/paysession/:paymentid/:status", ({ paymentid, status }) =>
+    `update payment set paymentstatus='${status}' where paymentid=${paymentid}`);
 const port = 5000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
 // http://localhost:5000/schedulesession/SES28587/2008/1003%20%20%20%20%20%20%20%20%20%20%20%20/BIO104/In%20person/2-3-2025/22:0:00/22:30:00/amogus

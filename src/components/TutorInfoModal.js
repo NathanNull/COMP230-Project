@@ -13,6 +13,7 @@ export default function TutorInfoModal({ tutor, close }) {
     const [subject, setSubject] = useState(null);
     const [tutorSessions, setTutorSessions] = useState([]);
     const [notes, setNotes] = useState("");
+    const [paymentMethod, setPaymentMethod] = useState(null);
 
     const { user } = useAuthContext();
 
@@ -34,23 +35,24 @@ export default function TutorInfoModal({ tutor, close }) {
         setChosenDate(null);
         setEndTime(null);
         setNotes("");
+        setPaymentMethod(null);
         close();
     }
     const pad = (num, n) => ("" + num).padStart(n, "0");
     const schedule = async () => {
-        if (chosenDate === null || endTime === null || notes === "" || subject === null) {
+        if (chosenDate === null || endTime === null || notes === "" || subject === null || paymentMethod === null) {
             return;
         }
 
-        let date = `${pad(chosenDate.getDate(), 2)}-${pad(chosenDate.getMonth()+1, 2)}-${chosenDate.getFullYear()}`;
+        let date = `${pad(chosenDate.getDate(), 2)}-${pad(chosenDate.getMonth() + 1, 2)}-${chosenDate.getFullYear()}`;
         let starttime = `${pad(chosenDate.getHours(), 2)}:${pad(chosenDate.getMinutes(), 2)}:00`;
         let endtime = `${pad(endTime.getHours(), 2)}:${pad(endTime.getMinutes(), 2)}:00`;
         let sessionid = `SES${Math.floor(Math.random() * 100000)}`;
-        console.log(`Querying schedulesession/${sessionid}/${tutor.tutorid}/${user.edcuserid}
-/${subject.subjectid}/${tutor.tutoringmode}/${date}/${starttime}/${endtime}/${notes}`)
+        let amount = Math.floor((parseTime(endtime) - parseTime(starttime)) / 60 * tutor.hourlywage);
+        // really should have made this a json object, but no time now
         getEndpoint(
             `schedulesession/${sessionid}/${tutor.tutorid}/${user.edcuserid}
-/${subject.subjectid}/${tutor.tutoringmode}/${date}/${starttime}/${endtime}/${notes}`
+/${subject.subjectid}/${tutor.tutoringmode}/${date}/${starttime}/${endtime}/${notes}/${paymentMethod}/${amount}`
         ).then(cancel).catch(console.error);
     }
 
@@ -102,11 +104,18 @@ export default function TutorInfoModal({ tutor, close }) {
             {endTime === null ? <></> : <div>End Time: {pad(endTime.getHours(), 2)}:{pad(endTime.getMinutes(), 2)}</div>}
         </div>}
         <input type="text" placeholder="Notes" value={notes} onChange={e => setNotes(e.target.value)} />
+        <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}>
+            <option value={null}>Choose a Payment Method</option>
+            <option value="Card">Card</option>
+            <option value="PayPal">PayPal</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+        </select>
         <div style={{ display: 'flex', gap: 20 }}>
             <button style={{ ...gstyles.button }} onClick={cancel}>Close</button>
             <button style={{
                 ...gstyles.button,
-                backgroundColor: !(chosenDate === null || endTime === null || notes === "" || subject === null) ? '#33aa33' : 'grey',
+                backgroundColor: !(chosenDate === null || endTime === null || notes === "" || subject === null || paymentMethod === null)
+                    ? '#33aa33' : 'grey',
                 color: 'white'
             }} onClick={schedule}>
                 Schedule

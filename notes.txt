@@ -5,6 +5,6 @@ As a student:
 - View tutors + availability (done)
 - Schedule session w/ tutor (done)
 - View scheduled/past sessions, cancel if desired (done)
-- Set up and make payments
+- Set up and make payments (done)
 As a tutor:
 - idek lmao, maybe I just won't do this one

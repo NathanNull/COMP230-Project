@@ -28,7 +28,7 @@ export default function StudentHome() {
         }
     }, [user, navigate]);
     return <div style={gstyles.container}>
-        <div>
+        <div style={{ maxWidth: '100%' }}>
             <div>
                 <h1>Your Information</h1>
                 {user?.firstname} {user?.lastname}, {studentInfo?.gradelevel} <br />
@@ -43,7 +43,8 @@ export default function StudentHome() {
                         return <div key={i} style={{ ...styles.session, borderBottomWidth: i !== sessions.length - 1 ? 1 : 0 }}>
                             {`${sessiontime > Date.now() ? `In ${time_relation}` : `${time_relation} ago`}:
                             ${t.notes} with ${t.firstname} ${t.lastname}
-                            (${t.sessionstatus})`} <button style={{ ...gstyles.button, fontSize: 'inherit', backgroundColor: 'lightblue' }}
+                            (${t.sessionstatus}${(t.sessionstatus === "Completed" && t.paymentstatus !== "Completed") ? ", Payment Required" : ""})`}
+                            <div style={{ flex: 1 }} /><button style={{ ...gstyles.button, fontSize: 'inherit', backgroundColor: 'lightblue' }}
                                 onClick={() => setSelectedSession(t)}>
                                 View
                             </button>
@@ -54,7 +55,6 @@ export default function StudentHome() {
             </div>
             <div>
                 <h1>Tutors Available</h1>
-                TODO: click to book sessions
                 <div style={styles.tutorList}>
                     <div style={styles.listHeader}>Name</div>
                     <div style={{ ...styles.listHeader, borderRightWidth: 1, borderLeftWidth: 1 }}>Subject</div>
@@ -78,7 +78,7 @@ export default function StudentHome() {
                     })}
 
                 </div>
-                <TutorInfoModal tutor={selectedTutor} close={() => setSelectedTutor(null)} />
+                <TutorInfoModal tutor={selectedTutor} close={() => {setSelectedTutor(null); updateSessions()}} />
             </div>
         </div>
 
@@ -96,6 +96,8 @@ const styles = {
         borderStyle: "solid",
     },
     session: {
+        display: 'flex',
+        flexDirection: 'row',
         borderWidth: 0,
         borderColor: "grey",
         borderStyle: "solid",
