@@ -1,5 +1,3 @@
-import { gstyles } from "../helpers/globalStyles";
-
 export default function Modal({ visible, children }) {
     return (<div style={{
         display: visible ? 'flex' : 'none',

@@ -31,9 +31,8 @@ export default function StudentHome() {
         <div>
             <div>
                 <h1>Your Information</h1>
-                Name: {user?.firstname} {user?.lastname} <br />
+                {user?.firstname} {user?.lastname}, {studentInfo?.gradelevel} <br />
                 Objective: {studentInfo?.objective} <br />
-                Grade: {studentInfo?.gradelevel}
             </div>
             <div>
                 <h1>Your Sessions</h1>

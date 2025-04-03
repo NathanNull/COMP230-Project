@@ -88,9 +88,18 @@ query_endpoint("/bookedsessions/:studentid", ({ studentid }) =>
     `select ts.*, u.firstname, u.lastname
     from tutoringsession ts join tutor t on t.tutorid=ts.tutorid join edcuser u on t.tutorid=u.edcuserid
     where studentid='${studentid}' order by ts.sessionstatus desc, ts.sessiondate asc, ts.starttime asc`);
-query_endpoint("/cancelsession/:studentid/:sessionid", ({studentid, sessionid}) => 
-    `update tutoringsession set sessionstatus='Cancelled' where sessionid='${sessionid}' and studentid='${studentid}'`);
-query_endpoint("/studentinfo/:studentid", ({studentid}) => `select * from student where studentid='${studentid}'`);
-
+query_endpoint("/cancelsession/:studentid/:sessionid", ({ studentid, sessionid }) =>
+    `update tutoringsession set sessionstatus='Cancelled' where sessionid='${sessionid}' and studentid=${studentid}`, r=> {
+        console.log("Altered "+r+" rows");
+        return r;
+    });
+query_endpoint("/studentinfo/:studentid", ({ studentid }) => `select * from student where studentid=${studentid}`);
+query_endpoint("/tutorsessions/:tutorid", ({ tutorid }) => `select * from tutoringsession where tutorid=${tutorid}`);
+query_endpoint("/taughtsubjects/:tutorid", ({ tutorid }) =>
+    `select * from subject where exists(select * from tutor where tutorid=${tutorid} and subjecttaught=subjectname)`);
+query_endpoint("/schedulesession/:sessionid/:tutorid/:studentid/:subjectid/:mode/:date/:starttime/:endtime/:notes",
+    ({ sessionid, tutorid, studentid, subjectid, mode, date, starttime, endtime, notes }) =>
+        `insert into tutoringsession values ('${sessionid}', ${tutorid}, ${studentid}, '${subjectid}', '${mode}', TO_DATE('${date}', 'DD-MM-YYYY'), TO_DATE('${starttime}', 'HH24:MI:SS'), TO_DATE('${endtime}', 'HH24:MI:SS'), 'Scheduled', '${notes}')`)
 const port = 5000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
+// http://localhost:5000/schedulesession/SES28587/2008/1003%20%20%20%20%20%20%20%20%20%20%20%20/BIO104/In%20person/2-3-2025/22:0:00/22:30:00/amogus

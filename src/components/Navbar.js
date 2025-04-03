@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import logo from '../logo.svg';
 import LoginModal from './LoginModal';
 import { gstyles } from '../helpers/globalStyles';
@@ -6,17 +6,19 @@ import { useAuthContext } from '../helpers/auth';
 import { NavLink } from 'react-router';
 export default function Navbar() {
     const [loginModalVisible, setLoginModalVisible] = useState(false);
-    const { user } = useAuthContext();
-    useEffect(() => {
-        if (user != null) {
-            console.log("Found user " + user.firstname);
-        }
-    }, [user]);
+    const { user, logout } = useAuthContext();
     return (<div style={styles.navbar}>
         <NavLink to="/" style={styles.title}>EduConnect</NavLink>
         <div style={styles.rightSide}>
-            <button style={gstyles.button} onClick={() => setLoginModalVisible(true)}>LOGIN</button>
-            <NavLink to="/" style={{height: '100%'}}><img src={logo} style={styles.logo} alt="logo" /></NavLink>
+            {user === null
+                ? <button style={gstyles.button} onClick={() => setLoginModalVisible(true)}>LOGIN</button>
+                : <>
+                    <span style={{color: 'white', paddingRight: 10}}>
+                        {user.firstname} {user.lastname}
+                    </span> <button style={gstyles.button} onClick={logout}>LOG OUT</button>
+                </>
+            }
+            <NavLink to="/" style={{ height: '100%' }}><img src={logo} style={styles.logo} alt="logo" /></NavLink>
         </div>
         <LoginModal visible={loginModalVisible} setVisible={setLoginModalVisible} />
     </div>)
