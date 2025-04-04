@@ -102,6 +102,11 @@ query_endpoint("/schedulesession/:sessionid/:tutorid/:studentid/:subjectid/:mode
         ]);
 query_endpoint("/paysession/:paymentid/:status", ({ paymentid, status }) =>
     `update payment set paymentstatus='${status}' where paymentid=${paymentid}`);
+query_endpoint("/createuser/:uid/:firstname/:lastname/:email/:password/:phone/:type", ({ uid, firstname, lastname, email, password, phone, type }) =>
+    `insert into edcuser values (${uid}, '${firstname}', '${lastname}', '${email}', '${password}', '${phone}', '${type}', SYSDATE)`);
+query_endpoint("/createstudent/:uid/:grade/:objective", ({ uid, grade, objective }) =>`insert into student values (${uid}, '${grade}', '${objective}')`);
+query_endpoint("/createtutor/:uid/:subject/:qualification/:experience/:mode/:wage/:language",
+    ({uid, subject, qualification, experience, mode, wage, language}) => `insert into tutor values (${uid}, '${subject}', '${qualification}',
+    ${experience}, '${mode}', ${wage}, '${language}')`)
 const port = 5000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
-// http://localhost:5000/schedulesession/SES28587/2008/1003%20%20%20%20%20%20%20%20%20%20%20%20/BIO104/In%20person/2-3-2025/22:0:00/22:30:00/amogus

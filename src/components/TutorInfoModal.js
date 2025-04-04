@@ -87,7 +87,7 @@ export default function TutorInfoModal({ tutor, close }) {
         );
     }
     return <Modal visible={tutor !== null}>
-        <h3>{`Book a session with ${tutor?.firstname} ${tutor?.lastname} (${tutor?.tutoringmode}, ${subject?.subjectid})`}</h3>
+        <h3>{`Book a session with ${tutor?.firstname} ${tutor?.lastname} (${tutor?.tutoringmode}, ${subject?.subjectid??tutor?.subjecttaught})`}</h3>
         <DatePicker selected={chosenDate} onChange={(date) => {
             setChosenDate(date);
             setEndTime(new Date(date.getTime() + (30 * 60 * 1000)));

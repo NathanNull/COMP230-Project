@@ -33,7 +33,8 @@ export default function Home() {
     <div className="App">
       <header style={gstyles.container}>
         <img src={logo} style={styles.logo} alt="logo" />
-        <span>Homepage (TODO: replace)</span>
+        <h2>EduConnect: Connecting students with tutors since 2025</h2>
+        Please log in to use this website
       </header>
     </div>
   );
