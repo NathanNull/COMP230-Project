@@ -8,12 +8,15 @@ export default function Navbar() {
     const [loginModalVisible, setLoginModalVisible] = useState(false);
     const { user, logout } = useAuthContext();
     return (<div style={styles.navbar}>
-        <NavLink to="/" style={styles.title}>EduConnect</NavLink>
+        <div>
+            <NavLink to="/" style={styles.title}>EduConnect</NavLink>
+            <span style={{ color: 'white', fontSize: 40, fontStyle: 'italic' }}> {user?.usertype}</span>
+        </div>
         <div style={styles.rightSide}>
             {user === null
                 ? <button style={gstyles.button} onClick={() => setLoginModalVisible(true)}>LOGIN</button>
                 : <>
-                    <span style={{color: 'white', paddingRight: 10}}>
+                    <span style={{ color: 'white', paddingRight: 10 }}>
                         {user.firstname} {user.lastname}
                     </span> <button style={gstyles.button} onClick={logout}>LOG OUT</button>
                 </>

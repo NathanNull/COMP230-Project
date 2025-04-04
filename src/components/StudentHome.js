@@ -19,7 +19,7 @@ export default function StudentHome() {
         getEndpoint(`bookedsessions/${user.edcuserid}`).then(setSessions).catch(console.error);
     }
     useEffect(() => {
-        if (user === null) {
+        if (user?.usertype !== "Student") {
             navigate("/");
         } else {
             getEndpoint("tutors").then(setTutors).catch(console.error);

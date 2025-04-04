@@ -9,4 +9,6 @@ update tutoringsession
 
 commit;
 
+select * from tutoringsession where SessionStatus='Scheduled';
+
 -- REMEMBER TO COMMIT IF YOU CHANGE ANYTHING, THIS DROVE ME NUTS FOR ALMOST HALF AN HOUR

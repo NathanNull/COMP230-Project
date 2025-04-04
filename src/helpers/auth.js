@@ -20,9 +20,9 @@ export function AuthContextProvider({ children }) {
     const logout = () => {
         setUser(null);
     }
-    // useEffect(() => {
-    //     login("liam.d@email.com", "pw3").then(() => console.log("Logging in automagically (auth.js), remove this in the final ver pls"))
-    // }, []);
+    useEffect(() => {
+        login("james.c@email.com", "pw6").then(() => console.log("Logging in automagically (auth.js), remove this in the final ver pls"))
+    }, []);
     return <AuthContext.Provider value={{ login, logout, user }}>
         {children}
     </AuthContext.Provider>

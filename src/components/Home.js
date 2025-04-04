@@ -18,13 +18,15 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user != null) {
-      if (user.usertype === "Student") {
-        navigate("/studenthome");
-      } else {
-        console.log("Unhandled user type " + user.usertype);
-      }
+    if (user === null) { return; }
+    else if (user.usertype === "Student") {
+      navigate("/studenthome");
+    } else if (user.usertype === "Tutor") {
+      navigate("/tutorhome");
+    } else {
+      console.log("Unhandled user type " + user.usertype);
     }
+
   }, [user, navigate])
 
   return (

@@ -83,12 +83,13 @@ query_endpoint("/bookedsessions/:studentid", ({ studentid }) =>
     from tutoringsession ts join tutor t on t.tutorid=ts.tutorid join edcuser u on t.tutorid=u.edcuserid join payment p on p.sessionid=ts.sessionid
     where ts.studentid='${studentid}' order by ts.sessionstatus desc, ts.sessiondate asc, ts.starttime asc`);
 query_endpoint("/cancelsession/:studentid/:sessionid", ({ studentid, sessionid }) =>
-    `update tutoringsession set sessionstatus='Cancelled' where sessionid='${sessionid}' and studentid=${studentid}`, r => {
-        console.log("Altered " + r + " rows");
-        return r;
-    });
+    `update tutoringsession set sessionstatus='Cancelled' where sessionid='${sessionid}' and studentid=${studentid}`);
+query_endpoint("/completesession/:studentid/:sessionid", ({ studentid, sessionid }) =>
+    `update tutoringsession set sessionstatus='Completed' where sessionid='${sessionid}' and studentid=${studentid}`);
 query_endpoint("/studentinfo/:studentid", ({ studentid }) => `select * from student where studentid=${studentid}`);
-query_endpoint("/tutorsessions/:tutorid", ({ tutorid }) => `select * from tutoringsession where tutorid=${tutorid}`);
+query_endpoint("/tutorsessions/:tutorid", ({ tutorid }) => `select ts.*, u.firstname, u.lastname, p.*
+    from tutoringsession ts join student s on s.studentid=ts.studentid join edcuser u on s.studentid=u.edcuserid join payment p on p.sessionid=ts.sessionid
+    where ts.tutorid='${tutorid}' order by ts.sessionstatus desc, ts.sessiondate asc, ts.starttime asc`);
 query_endpoint("/taughtsubjects/:tutorid", ({ tutorid }) =>
     `select * from subject where exists(select * from tutor where tutorid=${tutorid} and subjecttaught=subjectname)`);
 query_endpoint("/schedulesession/:sessionid/:tutorid/:studentid/:subjectid/:mode/:date/:starttime/:endtime/:notes/:paymentmethod/:amount",
